@@ -1,0 +1,288 @@
+/* ===== Ink Scholar 全局样式 ===== */
+
+/* ==================== CSS 自定义属性 (Design Tokens) ==================== */
+
+:root {
+  /* 主色 Primary — QQ阅读蓝 */
+  --c-primary-50: #eaf6ff;
+  --c-primary-100: #d2ecff;
+  --c-primary-200: #a9deff;
+  --c-primary-300: #78c9ff;
+  --c-primary-400: #4cb6ff;
+  --c-primary-500: #2faeff;
+  --c-primary-600: #1585ce;
+  --c-primary-700: #0c6fb4;
+  --c-primary-800: #0a5c96;
+  --c-primary-900: #0a4f80;
+
+  /* 创作语义色 Accent — 琥珀金（AI/灵感） */
+  --c-accent-50: #fdf6ec;
+  --c-accent-100: #f8e9ce;
+  --c-accent-300: #efc483;
+  --c-accent-500: #e0a64e;
+  --c-accent-600: #d18f2e;
+  --c-accent-700: #b5741f;
+
+  /* 中性色 Neutral */
+  --c-bg: #f6f8fa;
+  --c-surface: #fff;
+  --c-surface-2: #f0f3f7;
+  --c-border: #e5e9f0;
+  --c-border-strong: #d4dae3;
+  --c-text-1: #1f2733;
+  --c-text-2: #3d4757;
+  --c-text-3: #6b7585;
+  --c-text-4: #9aa3b2;
+
+  /* 语义状态色 Semantic */
+  --c-success: #1fa971;
+  --c-success-bg: #e7f6ef;
+  --c-warning: #e89b1c;
+  --c-warning-bg: #fcf1dd;
+  --c-error: #f0544f;
+  --c-error-bg: #fce9e8;
+  --c-info: #2faeff;
+  --c-info-bg: #eaf6ff;
+
+  /* 技能类型色 Skill */
+  --c-skill-agent: #36bfa3;
+  --c-skill-agent-bg: #e6f7f3;
+
+  /* 间距 Spacing (4pt base) */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-8: 32px;
+  --sp-10: 40px;
+  --sp-12: 48px;
+
+  /* 圆角 Radius */
+  --r-sm: 6px;
+  --r-base: 10px;
+  --r-md: 12px;
+  --r-lg: 16px;
+  --r-xl: 20px;
+  --r-pill: 999px;
+
+  /* 阴影 Shadows */
+  --sh-sm: 0 1px 2px rgb(16 24 40 / 6%);
+  --sh-md: 0 4px 12px rgb(16 24 40 / 8%);
+  --sh-lg: 0 12px 28px rgb(16 24 40 / 10%);
+  --sh-xl: 0 20px 48px rgb(16 24 40 / 14%);
+
+  /* 动效 Motion */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --t-fast: 140ms;
+  --t-base: 220ms;
+  --t-slow: 320ms;
+
+  /* 字体 Font */
+  --font-serif: "Noto Serif SC", "Source Han Serif SC", "SimSun", serif;
+  --font-sans: "Inter", "Noto Sans SC", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", "Fira Code", monospace;
+
+  /* 布局尺寸 Layout */
+  --sidebar-width: 220px;
+  --header-height: 56px;
+  --editor-chapter-width: 260px;
+  --editor-ai-width: 380px;
+  --editor-content-max: 820px;
+  --content-max-width: 1200px;
+
+  /* 基础样式 */
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--c-text-2);
+  background-color: var(--c-bg);
+  font-synthesis: none;
+  text-rendering: optimizelegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ==================== 深色模式 ==================== */
+
+[data-theme="dark"] {
+  --c-bg: #0f1318;
+  --c-surface: #171c23;
+  --c-surface-2: #1f2630;
+  --c-border: #2a3240;
+  --c-border-strong: #3a4555;
+  --c-text-1: #eaf0f6;
+  --c-text-2: #c2cad6;
+  --c-text-3: #8a93a3;
+  --c-text-4: #5a6373;
+
+  --c-primary-50: rgb(63 182 255 / 16%);
+  --c-primary-100: rgb(63 182 255 / 22%);
+  --c-primary-200: rgb(63 182 255 / 36%);
+  --c-primary-500: #3fb6ff;
+  --c-primary-600: #66b1ff;
+  --c-primary-700: #7cc8ff;
+
+  --c-accent-50: rgb(224 166 78 / 14%);
+  --c-accent-100: rgb(224 166 78 / 26%);
+  --c-accent-300: rgb(224 166 78 / 45%);
+  --c-accent-500: #eab85e;
+  --c-accent-600: #d99a36;
+
+  --c-warning-bg: rgb(232 155 28 / 16%);
+
+  --c-skill-agent: #4fd4b8;
+  --c-skill-agent-bg: rgb(54 191 163 / 14%);
+}
+
+/* ==================== 全局重置 ==================== */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  margin: 0;
+  height: 100vh;
+  overflow: hidden;
+  background-color: var(--c-bg);
+  color: var(--c-text-2);
+  font-family: var(--font-sans);
+}
+
+/* ==================== 滚动条 ==================== */
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--c-border-strong);
+  border-radius: var(--r-pill);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--c-text-4);
+}
+
+/* ==================== 焦点样式 ==================== */
+
+:focus-visible {
+  outline: 2px solid var(--c-primary-500);
+  outline-offset: 2px;
+}
+
+/* ==================== 动画 ==================== */
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* ==================== 工具类 ==================== */
+
+.fade-in {
+  animation: fade-in var(--t-base) var(--ease-out);
+}
+
+.text-serif {
+  font-family: var(--font-serif);
+}
+
+.text-mono {
+  font-family: var(--font-mono);
+}
+
+.text-ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    /* biome-ignore lint/complexity/noImportantStyles: reduced-motion 强制关闭动画，必须 !important 覆盖第三方库 */
+    animation-duration: 0.01ms !important;
+    /* biome-ignore lint/complexity/noImportantStyles: reduced-motion 强制关闭动画 */
+    animation-iteration-count: 1 !important;
+    /* biome-ignore lint/complexity/noImportantStyles: reduced-motion 强制关闭过渡 */
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ==================== Antd 布局适配 ==================== */
+
+.app-layout .ant-layout-sider {
+  /* biome-ignore lint/complexity/noImportantStyles: 覆盖 Antd 默认侧边栏背景色 */
+  background: var(--c-surface) !important;
+}
+
+.app-layout .ant-menu-inline {
+  background: transparent;
+}
+
+.app-layout .ant-layout-header {
+  line-height: normal;
+}

@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024" role="img" aria-label="AI Ink Scholar X">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3bbcff"/>
+      <stop offset="1" stop-color="#1577c9"/>
+    </linearGradient>
+    <linearGradient id="spark" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffe0a0"/>
+      <stop offset="1" stop-color="#e0a64e"/>
+    </linearGradient>
+  </defs>
+
+  <rect x="64" y="64" width="896" height="896" rx="208" ry="208" fill="url(#bg)"/>
+
+  <path d="M512 88 C 542 200, 562 208, 642 218 C 562 228, 542 236, 512 348 C 482 236, 462 228, 382 218 C 462 208, 482 200, 512 88 Z" fill="url(#spark)"/>
+  <circle cx="512" cy="218" r="30" fill="#fff7e6" opacity="0.92"/>
+
+  <path d="M512 360 C 452 430, 420 560, 420 680 C 420 760, 460 822, 512 840 C 564 822, 604 760, 604 680 C 604 560, 572 430, 512 360 Z" fill="#f6faff"/>
+
+  <path d="M512 372 L 512 410" stroke="#1577c9" stroke-width="13" stroke-linecap="round"/>
+  <circle cx="512" cy="434" r="24" fill="#1577c9"/>
+</svg>

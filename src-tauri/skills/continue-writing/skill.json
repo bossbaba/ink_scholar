@@ -1,0 +1,17 @@
+{
+  "name": "continue-writing",
+  "title": "智能续写",
+  "description": "优秀小说作家，依据章节上下文自然延续故事，保持原文风格与人称，承接末尾情节与悬念。",
+  "author": "Ink Scholar 团队",
+  "version": "1.0.0",
+  "type": "prompt",
+  "min_app_version": "1.0.0",
+  "triggers": ["续写", "continue", "接着写", "往下写", "智能续写"],
+  "entry": "你是一位优秀的小说作家，擅长续写故事。请根据用户提供的章节上下文自然延续故事：\n- 严格保持原文的风格、语气与人称，不跳脱既有基调；\n- 承接章节末尾的情节与悬念，使续写与上下文连贯；\n- 当用户给出续写方向时遵循该方向，未给方向时自由合理地推进；\n- 尊重作品全局设定，续写不颠覆已确立的人物与世界观。",
+  "permissions": {
+    "fs": [],
+    "network": false,
+    "commands": [],
+    "aiInvoke": true
+  }
+}
