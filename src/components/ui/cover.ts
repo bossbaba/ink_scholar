@@ -17,16 +17,16 @@ export function getGenreIcon(genre: string): string {
 
 export function getCoverGradient(genre: string): string {
   const gradients: Record<string, string> = {
-    玄幻: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-    仙侠: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
-    都市: "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)",
-    历史: "linear-gradient(135deg, #C9A96E 0%, #E8D5A8 100%)",
-    科幻: "linear-gradient(135deg, #0c3483 0%, #a2b6df 100%)",
-    悬疑: "linear-gradient(135deg, #434343 0%, #6B7585 100%)",
-    言情: "linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)",
-    武侠: "linear-gradient(135deg, #E08A5B 0%, #F5C89A 100%)",
-    奇幻: "linear-gradient(135deg, #9B8EC4 0%, #C8B8E8 100%)",
-    游戏: "linear-gradient(135deg, #36BFA3 0%, #7BE8D4 100%)",
+    玄幻: "linear-gradient(135deg, #2faeff 0%, #0c6fb4 100%)",
+    仙侠: "linear-gradient(135deg, #36bfa3 0%, #2faeff 100%)",
+    都市: "linear-gradient(135deg, #1585ce 0%, #4cb6ff 100%)",
+    历史: "linear-gradient(135deg, #e0a64e 0%, #efc483 100%)",
+    科幻: "linear-gradient(135deg, #0c3483 0%, #4cb6ff 100%)",
+    悬疑: "linear-gradient(135deg, #3d4757 0%, #6b7585 100%)",
+    言情: "linear-gradient(135deg, #e0a64e 0%, #fdf6ec 100%)",
+    武侠: "linear-gradient(135deg, #d18f2e 0%, #e0a64e 100%)",
+    奇幻: "linear-gradient(135deg, #36bfa3 0%, #7be8d4 100%)",
+    游戏: "linear-gradient(135deg, #1fa971 0%, #36bfa3 100%)",
   };
   return gradients[genre] ?? gradients.玄幻;
 }

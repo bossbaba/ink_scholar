@@ -12,6 +12,7 @@ import {
   SunOutlined,
 } from "@ant-design/icons";
 import {
+  AutoComplete,
   Button,
   Empty,
   Form,
@@ -429,15 +430,36 @@ function AiProviderSettings() {
               )
             }
           </Form.Item>
-          <Form.Item label="默认模型" name="defaultModel" rules={[{ required: true }]}>
-            <div style={{ display: "flex", gap: 8 }}>
-              <Form.Item name="defaultModel" noStyle>
-                <Input placeholder="例如：llama2、qwen-turbo" style={{ flex: 1 }} />
-              </Form.Item>
-              <Button icon={<ReloadOutlined />} loading={loadingModels} onClick={fetchModels}>
-                获取模型
-              </Button>
-            </div>
+          <Form.Item label="默认模型" required>
+            <Form.Item noStyle dependencies={["availableModels"]}>
+              {({ getFieldValue }) => {
+                const models = (getFieldValue("availableModels") || []) as string[];
+                return (
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <Form.Item
+                      name="defaultModel"
+                      noStyle
+                      rules={[{ required: true, message: "请选择或输入模型" }]}
+                    >
+                      <AutoComplete
+                        placeholder={
+                          models.length
+                            ? "选择或输入模型"
+                            : "点击右侧「获取模型」拉取列表"
+                        }
+                        options={models.map((m) => ({ label: m, value: m }))}
+                        style={{ flex: 1 }}
+                        allowClear
+                        filterOption={false}
+                      />
+                    </Form.Item>
+                    <Button icon={<ReloadOutlined />} loading={loadingModels} onClick={fetchModels}>
+                      获取模型
+                    </Button>
+                  </div>
+                );
+              }}
+            </Form.Item>
           </Form.Item>
           {modelHint && (
             <div style={{ fontSize: 13, color: "var(--c-text-3)", marginTop: -8 }}>{modelHint}</div>

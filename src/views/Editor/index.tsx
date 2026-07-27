@@ -21,7 +21,7 @@ import TextAlign from "@tiptap/extension-text-align";
 import Underline from "@tiptap/extension-underline";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import { Button, Divider, message, Spin, Tooltip } from "antd";
+import { Button, Divider, Input, message, Modal, Spin, Tooltip } from "antd";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import AiPanel from "@/components/AiPanel/AiPanel";
@@ -36,6 +36,8 @@ export default function Editor() {
 
   const [showAiPanel, setShowAiPanel] = useState(false);
   const [showOutline, setShowOutline] = useState(true);
+  const [addChapterOpen, setAddChapterOpen] = useState(false);
+  const [newChapterTitle, setNewChapterTitle] = useState("");
   const autoSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const currentNovel = useNovelStore((s) => s.currentNovel);
@@ -131,11 +133,23 @@ export default function Editor() {
     return () => window.removeEventListener("keydown", handleKeydown);
   }, [handleSave]);
 
-  const handleAddChapter = async () => {
+  const handleAddChapter = () => {
     const title = `第 ${(currentNovel?.chapters.length || 0) + 1} 章`;
+    setNewChapterTitle(title);
+    setAddChapterOpen(true);
+  };
+
+  const handleConfirmAddChapter = async () => {
+    const title = newChapterTitle.trim();
+    if (!title) {
+      message.warning("请输入章节名称");
+      return;
+    }
     try {
       const chapter = await novelStore.addChapter(title);
       if (chapter) novelStore.setActiveChapter(chapter.id);
+      setAddChapterOpen(false);
+      setNewChapterTitle("");
     } catch {
       message.error("添加章节失败");
     }
@@ -233,6 +247,24 @@ export default function Editor() {
           </div>
         </div>
       )}
+
+      <Modal
+        title="新建章节"
+        open={addChapterOpen}
+        onOk={handleConfirmAddChapter}
+        onCancel={() => setAddChapterOpen(false)}
+        okText="创建"
+        cancelText="取消"
+        destroyOnClose
+      >
+        <Input
+          placeholder="请输入章节名称"
+          value={newChapterTitle}
+          onChange={(e) => setNewChapterTitle(e.target.value)}
+          onPressEnter={handleConfirmAddChapter}
+          autoFocus
+        />
+      </Modal>
 
       {/* Center: Editor */}
       <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
@@ -365,11 +397,13 @@ export default function Editor() {
         <div
           style={{
             width: 380,
+            minWidth: 0,
             flexShrink: 0,
             borderLeft: "1px solid var(--c-border)",
             display: "flex",
             flexDirection: "column",
             height: "100%",
+            overflow: "hidden",
           }}
         >
           <AiPanel />

@@ -5,7 +5,7 @@ import {
   ThunderboltOutlined,
 } from "@ant-design/icons";
 import { Bubble, Sender } from "@ant-design/x";
-import { Button, message, Tabs } from "antd";
+import { Button, message } from "antd";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { buildNovelContext } from "@/services/novelContext";
 import { PROMPTS } from "@/services/prompts";
@@ -29,10 +29,33 @@ const mkMsg = (role: TabMessage["role"], content: string): TabMessage => ({
 export default function AiPanel() {
   const aiStore = useAiStore();
   const [activeTab, setActiveTab] = useState("chat");
-  const [messages, setMessages] = useState<TabMessage[]>([]);
-  const [inputValue, setInputValue] = useState("");
-  const [generating, setGenerating] = useState(false);
+  // 每个 tab 独立保存各自的对话历史，避免切换 tab 时互相覆盖导致对话丢失
+  const [messagesByTab, setMessagesByTab] = useState<Record<string, TabMessage[]>>({});
+  // 每个 tab 独立的输入框草稿
+  const [inputValues, setInputValues] = useState<Record<string, string>>({});
+  // 每个 tab 独立的生成中状态
+  const [generatingByTab, setGeneratingByTab] = useState<Record<string, boolean>>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const activeMessages = messagesByTab[activeTab] ?? [];
+
+  // 按 tab 读写对话历史
+  const setTabMessages = useCallback(
+    (tab: string, updater: (prev: TabMessage[]) => TabMessage[]) => {
+      setMessagesByTab((prev) => ({ ...prev, [tab]: updater(prev[tab] ?? []) }));
+    },
+    [],
+  );
+  const setTabInput = useCallback((tab: string, value: string) => {
+    setInputValues((prev) => ({ ...prev, [tab]: value }));
+  }, []);
+  const isGenerating = useCallback(
+    (tab: string) => generatingByTab[tab] === true,
+    [generatingByTab],
+  );
+  const setGenerating = useCallback((tab: string, value: boolean) => {
+    setGeneratingByTab((prev) => ({ ...prev, [tab]: value }));
+  }, []);
 
   const currentNovel = useNovelStore((s) => s.currentNovel);
   const activeChapterId = useNovelStore((s) => s.activeChapterId);
@@ -52,7 +75,7 @@ export default function AiPanel() {
   // biome-ignore lint/correctness/useExhaustiveDependencies: scroll chat list to bottom whenever messages change (timing dependency; messages is not read inside the closure)
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [activeMessages, activeTab]);
 
   const buildContextMessages = useCallback((): ChatMessage[] => {
     const contextMessages: ChatMessage[] = [];
@@ -67,24 +90,25 @@ export default function AiPanel() {
 
   const sendChat = useCallback(
     async (userText: string) => {
-      if (!userText.trim() || generating) return;
-      setGenerating(true);
-      const newMessages = [...messages, mkMsg("user", userText)];
-      setMessages(newMessages);
-      setInputValue("");
+      if (!userText.trim() || isGenerating("chat")) return;
+      setGenerating("chat", true);
+      const tab = "chat";
+      const existing = messagesByTab[tab] ?? [];
+      const userMsg = mkMsg("user", userText);
+      const assistantMsg = mkMsg("assistant", "");
+      setTabMessages(tab, (prev) => [...prev, userMsg, assistantMsg]);
+      setTabInput(tab, "");
 
       try {
         const chatMessages: ChatMessage[] = [
           ...buildContextMessages(),
-          ...newMessages.map((m) => ({ role: m.role, content: m.content })),
+          ...[...existing, userMsg].map((m) => ({ role: m.role, content: m.content })),
         ];
 
         let assistantContent = "";
-        setMessages((prev) => [...prev, mkMsg("assistant", "")]);
-
         await aiStore.chatStream(chatMessages, (chunk) => {
           assistantContent += chunk;
-          setMessages((prev) => {
+          setTabMessages(tab, (prev) => {
             const updated = [...prev];
             updated[updated.length - 1] = {
               ...updated[updated.length - 1],
@@ -95,46 +119,51 @@ export default function AiPanel() {
         });
       } catch (err) {
         message.error(err instanceof Error ? err.message : "AI 请求失败");
-        setMessages((prev) => [...prev, mkMsg("assistant", "请求失败，请重试。")]);
+        setTabMessages(tab, (prev) => [...prev, mkMsg("assistant", "请求失败，请重试。")]);
       } finally {
-        setGenerating(false);
+        setGenerating("chat", false);
       }
     },
-    [messages, generating, aiStore, buildContextMessages],
+    [messagesByTab, aiStore, buildContextMessages, isGenerating, setTabMessages, setTabInput, setGenerating],
   );
 
   // 通用流式任务：先放置稳定的 user/assistant 两条消息（id 仅在创建时生成一次），
   // 流式过程中只增量更新 assistant 那条的内容，避免每片 chunk 都重建整个数组，
   // 导致 Bubble 反复重挂载与滚动跳动（原 handleContinue/Inspiration/Optimize 的 bug）。
+  // 每个 tab 独立保存对话，切换 tab 不会丢失也不会互相覆盖。
   const runAssistantTask = useCallback(
-    async (userLabel: string, buildChatMessages: () => ChatMessage[]) => {
-      if (generating) return;
-      setGenerating(true);
+    async (
+      tab: string,
+      userLabel: string,
+      buildChatMessages: () => ChatMessage[],
+    ) => {
+      if (isGenerating(tab)) return;
+      setGenerating(tab, true);
       const userMsg = mkMsg("user", userLabel);
       const assistantMsg = mkMsg("assistant", "");
-      setMessages([userMsg, assistantMsg]);
+      setTabMessages(tab, () => [userMsg, assistantMsg]);
       try {
         const chatMessages = buildChatMessages();
         let content = "";
         await aiStore.chatStream(chatMessages, (chunk) => {
           content += chunk;
-          setMessages((prev) =>
+          setTabMessages(tab, (prev) =>
             prev.map((m) => (m.id === assistantMsg.id ? { ...m, content } : m)),
           );
         });
       } catch (err) {
         message.error(err instanceof Error ? err.message : "生成失败");
       } finally {
-        setGenerating(false);
+        setGenerating(tab, false);
       }
     },
-    [generating, aiStore],
+    [aiStore, isGenerating, setTabMessages, setGenerating],
   );
 
   const handleContinue = useCallback(async () => {
     if (!currentChapter) return;
     const novelCtx = currentNovel ? buildNovelContext(currentNovel) : undefined;
-    await runAssistantTask("请继续写作", () => {
+    await runAssistantTask("continue", "请继续写作", () => {
       const msgs = PROMPTS.continueWriting(currentChapter.content || "", undefined, novelCtx);
       const chatMessages: ChatMessage[] = [
         ...buildContextMessages(),
@@ -149,7 +178,7 @@ export default function AiPanel() {
     async (direction: string) => {
       if (!direction.trim()) return;
       const novelCtx = currentNovel ? buildNovelContext(currentNovel) : undefined;
-      await runAssistantTask(`灵感：${direction}`, () => {
+      await runAssistantTask("inspiration", `灵感：${direction}`, () => {
         const msgs = PROMPTS.buildInspiration(direction, currentNovel?.genre || "通用", novelCtx);
         const chatMessages: ChatMessage[] = [
           ...buildContextMessages(),
@@ -166,7 +195,7 @@ export default function AiPanel() {
     async (text: string) => {
       if (!text) return;
       const novelCtx = currentNovel ? buildNovelContext(currentNovel) : undefined;
-      await runAssistantTask(`优化文本：${text.slice(0, 100)}...`, () => {
+      await runAssistantTask("optimize", `优化文本：${text.slice(0, 100)}...`, () => {
         const msgs = PROMPTS.optimizeSentence(text, novelCtx);
         const chatMessages: ChatMessage[] = [
           ...buildContextMessages(),
@@ -179,118 +208,85 @@ export default function AiPanel() {
     [currentNovel, runAssistantTask, buildContextMessages],
   );
 
-  // Reset messages when switching tabs
-  // biome-ignore lint/correctness/useExhaustiveDependencies: activeTab is intentionally used only as a trigger to reset draft state on tab switch, not read inside the closure
-  useEffect(() => {
-    setMessages([]);
-    setInputValue("");
-  }, [activeTab]);
-
   const noProvider = !aiStore.activeProvider;
 
-  const tabItems = [
-    {
-      key: "chat",
-      label: (
-        <span>
-          <SendOutlined /> 对话
-        </span>
-      ),
-      children: (
-        <ChatTab
-          messages={messages}
-          inputValue={inputValue}
-          setInputValue={setInputValue}
-          onSend={sendChat}
-          generating={generating}
-          noProvider={noProvider}
-          messagesEndRef={messagesEndRef}
-        />
-      ),
-    },
-    {
-      key: "continue",
-      label: (
-        <span>
-          <FileTextOutlined /> 续写
-        </span>
-      ),
-      children: (
-        <ActionTab
-          title="AI 续写"
-          description="基于当前章节内容，AI 将为你续写故事"
-          buttonText="开始续写"
-          onAction={handleContinue}
-          messages={messages}
-          generating={generating}
-          noProvider={noProvider}
-          messagesEndRef={messagesEndRef}
-        />
-      ),
-    },
-    {
-      key: "inspiration",
-      label: (
-        <span>
-          <BulbOutlined /> 灵感
-        </span>
-      ),
-      children: (
-        <InputActionTab
-          title="灵感生成"
-          placeholder="描述你想要的灵感方向..."
-          buttonText="生成灵感"
-          onAction={handleInspiration}
-          messages={messages}
-          inputValue={inputValue}
-          setInputValue={setInputValue}
-          generating={generating}
-          noProvider={noProvider}
-          messagesEndRef={messagesEndRef}
-        />
-      ),
-    },
-    {
-      key: "optimize",
-      label: (
-        <span>
-          <ThunderboltOutlined /> 优化
-        </span>
-      ),
-      children: (
-        <InputActionTab
-          title="文本优化"
-          placeholder="粘贴需要优化的文本..."
-          buttonText="优化文本"
-          onAction={handleOptimize}
-          messages={messages}
-          inputValue={inputValue}
-          setInputValue={setInputValue}
-          generating={generating}
-          noProvider={noProvider}
-          messagesEndRef={messagesEndRef}
-        />
-      ),
-    },
+  const TABS = [
+    { key: "chat", label: "对话", icon: <SendOutlined /> },
+    { key: "continue", label: "续写", icon: <FileTextOutlined /> },
+    { key: "inspiration", label: "灵感", icon: <BulbOutlined /> },
+    { key: "optimize", label: "优化", icon: <ThunderboltOutlined /> },
   ];
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        height: "100%",
-        background: "var(--c-surface)",
-      }}
-    >
-      <Tabs
-        activeKey={activeTab}
-        onChange={setActiveTab}
-        items={tabItems}
-        size="small"
-        className="ai-tabs"
-        tabBarStyle={{ padding: "0 16px", marginBottom: 0 }}
-      />
+    <div className="ai-panel">
+      <div className="ai-tabbar" role="tablist" aria-label="AI 功能">
+        {TABS.map((t) => (
+          <button
+            key={t.key}
+            type="button"
+            role="tab"
+            aria-selected={activeTab === t.key}
+            className={`ai-tabbar__item${activeTab === t.key ? " is-active" : ""}`}
+            onClick={() => setActiveTab(t.key)}
+          >
+            {t.icon}
+            {t.label}
+          </button>
+        ))}
+      </div>
+      <div className="ai-body">
+        {activeTab === "chat" && (
+          <ChatTab
+            messages={activeMessages}
+            inputValue={inputValues["chat"] ?? ""}
+            setInputValue={(v) => setTabInput("chat", v)}
+            onSend={sendChat}
+            generating={isGenerating("chat")}
+            noProvider={noProvider}
+            messagesEndRef={messagesEndRef}
+          />
+        )}
+        {activeTab === "continue" && (
+          <ActionTab
+            title="AI 续写"
+            description="基于当前章节内容，AI 将为你续写故事"
+            buttonText="开始续写"
+            onAction={handleContinue}
+            messages={activeMessages}
+            generating={isGenerating("continue")}
+            noProvider={noProvider}
+            messagesEndRef={messagesEndRef}
+          />
+        )}
+        {activeTab === "inspiration" && (
+          <InputActionTab
+            title="灵感生成"
+            placeholder="描述你想要的灵感方向..."
+            buttonText="生成灵感"
+            onAction={handleInspiration}
+            messages={activeMessages}
+            inputValue={inputValues["inspiration"] ?? ""}
+            setInputValue={(v) => setTabInput("inspiration", v)}
+            generating={isGenerating("inspiration")}
+            noProvider={noProvider}
+            messagesEndRef={messagesEndRef}
+          />
+        )}
+        {activeTab === "optimize" && (
+          <InputActionTab
+            title="文本优化"
+            placeholder="粘贴需要优化的文本..."
+            buttonText="优化文本"
+            onAction={handleOptimize}
+            messages={activeMessages}
+            inputValue={inputValues["optimize"] ?? ""}
+            setInputValue={(v) => setTabInput("optimize", v)}
+            generating={isGenerating("optimize")}
+            noProvider={noProvider}
+            messagesEndRef={messagesEndRef}
+          />
+        )}
+      </div>
     </div>
   );
 }

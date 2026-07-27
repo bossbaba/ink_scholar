@@ -4,23 +4,43 @@
       <stop offset="0" stop-color="#3bbcff"/>
       <stop offset="1" stop-color="#1577c9"/>
     </linearGradient>
-    <linearGradient id="spark" x1="0" y1="0" x2="1" y2="1">
+    <linearGradient id="spark" x1="0" y1="1" x2="0" y2="0">
       <stop offset="0" stop-color="#ffe0a0"/>
       <stop offset="1" stop-color="#e0a64e"/>
     </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#fff7e6" stop-opacity="0.7"/>
+      <stop offset="100%" stop-color="#ffe0a0" stop-opacity="0"/>
+    </radialGradient>
   </defs>
 
   <!-- 圆角方底 -->
   <rect x="64" y="64" width="896" height="896" rx="208" ry="208" fill="url(#bg)"/>
 
-  <!-- AI 火花：四角星 -->
-  <path d="M512 88 C 542 200, 562 208, 642 218 C 562 228, 542 236, 512 348 C 482 236, 462 228, 382 218 C 462 208, 482 200, 512 88 Z" fill="url(#spark)"/>
-  <circle cx="512" cy="218" r="30" fill="#fff7e6" opacity="0.92"/>
+  <!-- 底部辉光 -->
+  <ellipse cx="512" cy="810" rx="270" ry="170" fill="url(#glow)"/>
 
-  <!-- 钢笔笔尖 -->
-  <path d="M512 360 C 452 430, 420 560, 420 680 C 420 760, 460 822, 512 840 C 564 822, 604 760, 604 680 C 604 560, 572 430, 512 360 Z" fill="#f6faff"/>
+  <!-- 钢笔笔身（圆头在上，笔尖朝下、拉长更尖） -->
+  <path d="M512 150 C 450 222, 414 322, 414 430 C 414 516, 466 588, 512 636 C 558 588, 610 516, 610 430 C 610 322, 574 222, 512 150 Z" fill="#f6faff"/>
 
-  <!-- 笔尖中缝 + 透气孔 -->
-  <path d="M512 372 L 512 410" stroke="#1577c9" stroke-width="13" stroke-linecap="round"/>
-  <circle cx="512" cy="434" r="24" fill="#1577c9"/>
+  <!-- 笔尖中缝 + 透气孔（朝下） -->
+  <path d="M512 608 L 512 560" stroke="#1577c9" stroke-width="12" stroke-linecap="round"/>
+  <circle cx="512" cy="536" r="20" fill="#1577c9"/>
+
+  <!-- AI 火花 / 星群（在底部，承接笔尖） -->
+  <path d="M512 670 C 542 782, 562 790, 642 800 C 562 810, 542 818, 512 930 C 482 818, 462 810, 382 800 C 462 790, 482 782, 512 670 Z" fill="url(#spark)"/>
+  <circle cx="512" cy="800" r="30" fill="#fff7e6" opacity="0.92"/>
+
+  <!-- 笔尖两侧新增小星（加密星群、模拟喷射） -->
+  <path d="M468 632 C 482 646, 494 654, 506 668 C 494 682, 482 690, 468 704 C 454 690, 442 682, 430 668 C 442 654, 454 646, 468 632 Z" fill="url(#spark)" opacity="0.9"/>
+  <path d="M556 632 C 570 646, 582 654, 594 668 C 582 682, 570 690, 556 704 C 542 690, 530 682, 518 668 C 530 654, 542 646, 556 632 Z" fill="url(#spark)" opacity="0.9"/>
+
+  <!-- 左右小星 -->
+  <path d="M340 730 C 354 744, 366 752, 378 766 C 366 780, 354 788, 340 802 C 326 788, 314 780, 300 766 C 314 752, 326 744, 340 730 Z" fill="url(#spark)" opacity="0.85"/>
+  <path d="M684 730 C 698 744, 710 752, 722 766 C 710 780, 698 788, 684 802 C 670 788, 658 780, 644 766 C 658 752, 670 744, 684 730 Z" fill="url(#spark)" opacity="0.85"/>
+
+  <!-- 底部微星 -->
+  <path d="M280 840 C 290 848, 298 854, 306 864 C 298 874, 290 880, 280 888 C 270 880, 262 874, 254 864 C 262 854, 270 848, 280 840 Z" fill="#f6faff" opacity="0.7"/>
+  <path d="M744 840 C 754 848, 762 854, 770 864 C 762 874, 754 880, 744 888 C 734 880, 726 874, 718 864 C 726 854, 734 848, 744 840 Z" fill="#f6faff" opacity="0.7"/>
+  <path d="M512 902 C 522 910, 530 916, 538 926 C 530 936, 522 942, 512 950 C 502 942, 494 936, 486 926 C 494 916, 502 910, 512 902 Z" fill="url(#spark)" opacity="0.9"/>
 </svg>

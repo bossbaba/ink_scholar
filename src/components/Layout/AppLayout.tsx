@@ -3,14 +3,12 @@ import {
   EditOutlined,
   HomeFilled,
   MenuOutlined,
-  MoonOutlined,
   NodeIndexOutlined,
   SearchOutlined,
   SettingOutlined,
-  SunOutlined,
   ThunderboltOutlined,
 } from "@ant-design/icons";
-import { Breadcrumb, Button, Layout, Menu, Modal, Tooltip } from "antd";
+import { Breadcrumb, Button, Layout, Menu, Modal } from "antd";
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAiStore } from "@/stores/useAiStore";
@@ -220,10 +218,6 @@ export default function AppLayout() {
     if (isMobile) setMobileOpen(false);
   };
 
-  const toggleTheme = () => {
-    settingsStore.setTheme(isDark ? "light" : "dark");
-  };
-
   // Determine active menu key
   const selectedKeys = useMemo(() => {
     if (currentPath.startsWith("/editor")) return [];
@@ -277,24 +271,6 @@ export default function AppLayout() {
           onClick={handleMenuClick}
           style={{ border: "none", background: "transparent", padding: "16px 12px" }}
         />
-
-        <div
-          style={{
-            padding: 16,
-            borderTop: "1px solid var(--c-border, #f0f0f0)",
-            display: "flex",
-            justifyContent: "center",
-          }}
-        >
-          <Tooltip title={isDark ? "切换浅色" : "切换深色"} placement="top">
-            <Button
-              type="text"
-              shape="circle"
-              icon={isDark ? <SunOutlined /> : <MoonOutlined />}
-              onClick={toggleTheme}
-            />
-          </Tooltip>
-        </div>
       </Sider>
 
       {/* Mobile overlay */}

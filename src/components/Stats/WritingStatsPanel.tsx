@@ -175,7 +175,7 @@ export default function WritingStatsPanel() {
       >
         <StatCard
           icon={<EditOutlined />}
-          iconBg="linear-gradient(135deg, #52c41a, #5fd4a9)"
+          iconBg="linear-gradient(135deg, var(--c-success), #36bfa3)"
           value={formatWordCount(headlineWords)}
           label="累计总字数"
         />
@@ -193,7 +193,7 @@ export default function WritingStatsPanel() {
         />
         <StatCard
           icon={<ThunderboltOutlined />}
-          iconBg="linear-gradient(135deg, #f6a23c, #f6c45c)"
+          iconBg="linear-gradient(135deg, var(--c-accent-500), var(--c-accent-300))"
           value={String(streak)}
           label="连续写作天数"
         />
